@@ -13,6 +13,7 @@
     <nav>
       <button id="backDashboard" type="button">新建练习</button>
       <button id="continueButton" type="button">继续写作</button>
+      <button id="openLatestReport" type="button">最近报告</button>
     </nav>
     <section class="sidebar-section"><h3>最近练习</h3><div id="historyList"></div></section>
     <div class="sidebar-footer">
@@ -23,29 +24,36 @@
   </aside>
 
   <main>
-    <header class="topbar"><div><span class="eyebrow">IELTS WRITING WORKSPACE</span><h1>用户自带题目的写作与评分工作台</h1></div><button id="newSessionButton" class="primary" type="button">新建练习</button></header>
+    <header class="topbar"><div><span class="eyebrow">IELTS WRITING WORKSPACE</span><h1>用户自带题目的写作、评分与复盘工作台</h1></div><button id="newSessionButton" class="primary" type="button">新建练习</button></header>
 
     <section id="dashboard" class="page">
       <div class="hero">
         <div><span class="eyebrow">第一步</span><h2>选择考试类型和写作任务</h2><p>系统以你的选择作为评分路线，后端会再次校验任务标识。网站不会提供或公开保存题库。</p></div>
         <div class="privacy-card"><strong>私密输入</strong><p>题目、草稿和历史记录默认保存在当前浏览器。提交评分时只发送当前题目和作文。</p></div>
       </div>
+      <section class="stats-strip" aria-label="本地练习统计">
+        <article><span>已评分</span><strong id="statTotal">0</strong><small>本机练习</small></article>
+        <article><span>平均分</span><strong id="statAverage">—</strong><small>Overall</small></article>
+        <article><span>最高分</span><strong id="statBest">—</strong><small>本机记录</small></article>
+        <article><span>优先提升</span><strong id="statWeakest" class="stat-text">暂无数据</strong><small>最低平均评分项</small></article>
+      </section>
       <div id="profileGrid" class="profile-grid"></div>
-      <section class="notice"><strong>使用提示</strong><p>请仅提交你有权使用的学习材料。Academic Task 1 第一版支持上传图片预览，但评分准确核对仍依赖你填写并确认的事实摘要。</p></section>
+      <section class="notice"><strong>使用提示</strong><p>请仅提交你有权使用的学习材料。Academic Task 1 支持上传图片预览，评分中的事实核对依赖你填写并确认的事实摘要。</p></section>
     </section>
 
     <section id="workspace" class="page hidden">
-      <div class="page-heading"><div><span id="profileBadge" class="badge"></span><h2 id="workspaceTitle"></h2><p>粘贴题目，完成写作，然后提交统一评分。</p></div><button class="secondary" type="button" onclick="document.getElementById('backDashboard').click()">更换任务</button></div>
+      <div class="page-heading"><div><span id="profileBadge" class="badge"></span><h2 id="workspaceTitle"></h2><p>粘贴题目，完成写作，然后提交统一评分。</p></div><button class="secondary" type="button" id="changeTaskButton">更换任务</button></div>
       <div class="workspace-grid">
         <section class="editor-column">
           <article class="panel prompt-panel"><div class="panel-heading"><div><span class="eyebrow">QUESTION</span><h3>题目与任务信息</h3></div><span id="saveStatus" class="save-status">已保存到本机</span></div>
             <label><span>自定义标题（可选）</span><input id="promptTitle" placeholder="例如：城市交通问题"></label>
             <label><span>作文题目</span><textarea id="promptText" class="prompt-input" placeholder="请粘贴完整作文题目"></textarea></label>
+            <div id="promptDetection" class="detection-box hidden"></div>
             <div class="two-fields"><label><span>题型（可选）</span><input id="questionType" placeholder="例如 agree/disagree、bar chart"></label><label id="letterStyleWrap" class="hidden"><span>书信语气</span><select id="letterStyle"><option value="">自动判断</option><option>formal</option><option>semi-formal</option><option>informal</option></select></label></div>
           </article>
 
           <article id="visualPanel" class="panel visual-panel hidden"><div class="panel-heading"><div><span class="eyebrow">ACADEMIC VISUAL</span><h3>题图和事实层</h3></div></div>
-            <div class="visual-grid"><label class="upload-box"><input id="imageInput" type="file" accept="image/*"><span>上传题图</span><small>仅在本机预览，第一版不自动上传图片给评分模型</small></label><div class="image-stage"><p id="imageEmpty">尚未选择图片</p><img id="imagePreview" class="hidden" alt="Academic Task 1题图预览"></div></div>
+            <div class="visual-grid"><label class="upload-box"><input id="imageInput" type="file" accept="image/*"><span>上传题图</span><small>图片只在本机预览，不自动进入公共题库</small></label><div class="image-stage"><p id="imageEmpty">尚未选择图片</p><img id="imagePreview" class="hidden" alt="Academic Task 1题图预览"></div></div>
             <div class="two-fields"><label><span>图表类型</span><select id="visualType"><option value="unknown">请选择</option><option value="line_chart">折线图</option><option value="bar_chart">柱状图</option><option value="pie_chart">饼图</option><option value="table">表格</option><option value="map">地图</option><option value="process">流程图</option><option value="mixed">混合图</option></select></label><label class="check-label"><input id="visualVerified" type="checkbox"><span>我已核对下面的事实摘要</span></label></div>
             <label><span>图表事实摘要</span><textarea id="visualDescription" placeholder="填写主要数据、趋势、阶段或地图变化。评分器只会依据这里提供的事实核对内容。"></textarea></label>
             <label><span>关键特征（每行一条，可选）</span><textarea id="visualFeatures" placeholder="例如：A在2020年达到最高点"></textarea></label>
@@ -53,13 +61,14 @@
 
           <article class="panel editor-panel"><div class="editor-toolbar"><div><span class="eyebrow">ESSAY DRAFT</span><h3>作文草稿</h3></div><div class="timer-control"><span id="timer">20:00</span><button id="timerButton" class="primary small" type="button">开始</button><button id="resetTimer" class="secondary small" type="button">重置</button></div></div>
             <textarea id="essay" class="essay-input" placeholder="在这里输入完整作文……" spellcheck="true"></textarea>
-            <div class="editor-footer"><span><strong id="wordCount">0</strong><span id="wordTarget"> / 150 words</span></span><span>草稿自动保存</span></div>
+            <div class="editor-footer"><span><strong id="wordCount">0</strong><span id="wordTarget"> / 150 words</span></span><div class="inline-actions"><button id="copyEssayButton" class="text-button" type="button">复制作文</button><button id="quickCheckButton" class="text-button" type="button">快速检查最后一句</button></div></div>
           </article>
+          <article id="liveCheckPanel" class="panel live-panel hidden"><div class="panel-heading"><div><span class="eyebrow">LIVE CHECK</span><h3>高置信度句子检查</h3></div><button id="closeLiveCheck" class="icon-button" type="button">×</button></div><div id="liveCheckContent"></div></article>
         </section>
 
         <aside class="assistant-column">
-          <article class="panel"><span class="eyebrow">PLAN</span><h3>写前计划</h3><textarea id="plan" class="plan-input" placeholder="记录结构、观点、比较或bullet要点"></textarea></article>
-          <article class="panel score-panel"><span class="eyebrow">AI SCORE</span><h3>提交完整评分</h3><p>使用当前统一 A/G 评分接口。稳定样本由双评分官完成，争议样本会进入条件复核。</p><button id="gradeButton" class="primary full" type="button">开始评分</button><div id="gradingState" class="grading-state hidden"></div></article>
+          <article class="panel"><span class="eyebrow">PLAN</span><h3>写前计划</h3><textarea id="plan" class="plan-input" placeholder="记录结构、观点、比较或 bullet 要点"></textarea></article>
+          <article class="panel score-panel"><span class="eyebrow">AI SCORE</span><h3>提交完整评分</h3><p>使用统一 A/G 评分接口。稳定样本由双评分官完成，争议样本会进入条件复核。</p><button id="gradeButton" class="primary full" type="button">开始评分</button><div id="gradingState" class="grading-state hidden"></div></article>
           <article class="panel legal-note"><strong>非官方声明</strong><p>本工具与 British Council、IDP、Cambridge 及 IELTS 官方不存在隶属或授权关系。AI估分仅供学习参考。</p></article>
         </aside>
       </div>
@@ -68,7 +77,37 @@
     <section id="report" class="page hidden">
       <div class="report-hero"><div><span class="eyebrow">SCORE REPORT</span><h2>本次写作评分</h2><p id="reportMeta"></p></div><div class="overall-score"><span>Overall</span><strong id="overallBand">0.0</strong><small>AI estimated band</small></div></div>
       <div id="criteriaGrid" class="criteria-grid"></div>
-      <div class="report-layout"><section><article class="panel"><span class="eyebrow">ASSESSMENT</span><h3>总体判断</h3><p id="assessment"></p></article><div id="reportDetails"></div></section><aside><article class="panel warning-panel"><span class="eyebrow">REVIEW FLAGS</span><h3>复核提示</h3><ul id="warningList"></ul></article><button id="editAgain" class="primary full" type="button">返回修改作文</button><button id="newFromReport" class="secondary full" type="button">新建另一篇</button></aside></div>
+      <div class="report-layout"><section><article class="panel"><span class="eyebrow">ASSESSMENT</span><h3>总体判断</h3><p id="assessment"></p></article><div id="reportDetails"></div></section><aside><article class="panel warning-panel"><span class="eyebrow">REVIEW FLAGS</span><h3>复核提示</h3><ul id="warningList"></ul></article><button id="exportReport" class="secondary full" type="button">导出本次报告</button><button id="editAgain" class="primary full" type="button">返回修改作文</button><button id="newFromReport" class="secondary full" type="button">新建另一篇</button></aside></div>
+
+      <section class="learning-hub">
+        <div class="learning-heading"><div><span class="eyebrow">LEARNING HUB</span><h2>把评分变成下一步行动</h2><p>这些模块只生成学习反馈，不改变已经冻结的分数。</p></div></div>
+        <div class="learning-tabs" role="tablist">
+          <button class="active" data-learning-tab="feedback" type="button">详细反馈</button>
+          <button data-learning-tab="revision" type="button">范文与改写</button>
+          <button data-learning-tab="teacher" type="button">AI教师与记忆</button>
+        </div>
+
+        <section id="learningFeedback" class="learning-panel">
+          <div class="module-grid">
+            <button data-feedback-module="overview" type="button"><strong>全文问题总览</strong><small>最影响分数的3–5个问题</small></button>
+            <button data-feedback-module="sentenceUpgrade" type="button"><strong>逐句修改升级</strong><small>原句、最小修正和升级版</small></button>
+            <button data-feedback-module="grammarWordFormSpelling" type="button"><strong>语法词形拼写</strong><small>按错误类型集中复盘</small></button>
+            <button data-feedback-module="structureCohesionTask" type="button"><strong>结构与任务回应</strong><small>A/G、Task 1/2 独立检查</small></button>
+          </div>
+          <div id="feedbackResult" class="learning-result"><p class="muted">选择一个模块生成反馈。</p></div>
+        </section>
+
+        <section id="learningRevision" class="learning-panel hidden">
+          <div class="action-banner"><div><strong>生成三步学习版本</strong><p>生成题目范文、基于原文的 +0.5 修改版和 +1.0 修改版。</p></div><button id="generateRevision" class="primary" type="button">开始生成</button></div>
+          <div id="revisionResult" class="learning-result"><p class="muted">评分完成后可生成学习版本。</p></div>
+        </section>
+
+        <section id="learningTeacher" class="learning-panel hidden">
+          <div class="memory-strip" id="memoryStats"></div>
+          <div class="action-banner"><div><strong>生成教师精讲课</strong><p>读取当前任务对应的错误记忆，找出重复错误、进步点和本次作业。</p></div><button id="generateTeacherClinic" class="primary" type="button">生成精讲</button></div>
+          <div id="teacherResult" class="learning-result"><p class="muted">教师记忆会按 A类Task 1、G类Task 1、A类Task 2、G类Task 2 分开保存。</p></div>
+        </section>
+      </section>
     </section>
   </main>
   <script type="module" src="js/app.js"></script>
