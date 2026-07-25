@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111936">
+  <title>IELTS Writing Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span>W</span><div><strong>Writing Studio</strong><small>Academic · General</small></div></div>
+    <nav>
+      <button id="backDashboard" type="button">新建练习</button>
+      <button id="continueButton" type="button">继续写作</button>
+    </nav>
+    <section class="sidebar-section"><h3>最近练习</h3><div id="historyList"></div></section>
+    <div class="sidebar-footer">
+      <button id="themeToggle" type="button">深色</button>
+      <button id="clearDataButton" class="danger-link" type="button">删除本地数据</button>
+      <p>独立学习工具，不提供公共题库。</p>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar"><div><span class="eyebrow">IELTS WRITING WORKSPACE</span><h1>用户自带题目的写作与评分工作台</h1></div><button id="newSessionButton" class="primary" type="button">新建练习</button></header>
+
+    <section id="dashboard" class="page">
+      <div class="hero">
+        <div><span class="eyebrow">第一步</span><h2>选择考试类型和写作任务</h2><p>系统以你的选择作为评分路线，后端会再次校验任务标识。网站不会提供或公开保存题库。</p></div>
+        <div class="privacy-card"><strong>私密输入</strong><p>题目、草稿和历史记录默认保存在当前浏览器。提交评分时只发送当前题目和作文。</p></div>
+      </div>
+      <div id="profileGrid" class="profile-grid"></div>
+      <section class="notice"><strong>使用提示</strong><p>请仅提交你有权使用的学习材料。Academic Task 1 第一版支持上传图片预览，但评分准确核对仍依赖你填写并确认的事实摘要。</p></section>
+    </section>
+
+    <section id="workspace" class="page hidden">
+      <div class="page-heading"><div><span id="profileBadge" class="badge"></span><h2 id="workspaceTitle"></h2><p>粘贴题目，完成写作，然后提交统一评分。</p></div><button class="secondary" type="button" onclick="document.getElementById('backDashboard').click()">更换任务</button></div>
+      <div class="workspace-grid">
+        <section class="editor-column">
+          <article class="panel prompt-panel"><div class="panel-heading"><div><span class="eyebrow">QUESTION</span><h3>题目与任务信息</h3></div><span id="saveStatus" class="save-status">已保存到本机</span></div>
+            <label><span>自定义标题（可选）</span><input id="promptTitle" placeholder="例如：城市交通问题"></label>
+            <label><span>作文题目</span><textarea id="promptText" class="prompt-input" placeholder="请粘贴完整作文题目"></textarea></label>
+            <div class="two-fields"><label><span>题型（可选）</span><input id="questionType" placeholder="例如 agree/disagree、bar chart"></label><label id="letterStyleWrap" class="hidden"><span>书信语气</span><select id="letterStyle"><option value="">自动判断</option><option>formal</option><option>semi-formal</option><option>informal</option></select></label></div>
+          </article>
+
+          <article id="visualPanel" class="panel visual-panel hidden"><div class="panel-heading"><div><span class="eyebrow">ACADEMIC VISUAL</span><h3>题图和事实层</h3></div></div>
+            <div class="visual-grid"><label class="upload-box"><input id="imageInput" type="file" accept="image/*"><span>上传题图</span><small>仅在本机预览，第一版不自动上传图片给评分模型</small></label><div class="image-stage"><p id="imageEmpty">尚未选择图片</p><img id="imagePreview" class="hidden" alt="Academic Task 1题图预览"></div></div>
+            <div class="two-fields"><label><span>图表类型</span><select id="visualType"><option value="unknown">请选择</option><option value="line_chart">折线图</option><option value="bar_chart">柱状图</option><option value="pie_chart">饼图</option><option value="table">表格</option><option value="map">地图</option><option value="process">流程图</option><option value="mixed">混合图</option></select></label><label class="check-label"><input id="visualVerified" type="checkbox"><span>我已核对下面的事实摘要</span></label></div>
+            <label><span>图表事实摘要</span><textarea id="visualDescription" placeholder="填写主要数据、趋势、阶段或地图变化。评分器只会依据这里提供的事实核对内容。"></textarea></label>
+            <label><span>关键特征（每行一条，可选）</span><textarea id="visualFeatures" placeholder="例如：A在2020年达到最高点"></textarea></label>
+          </article>
+
+          <article class="panel editor-panel"><div class="editor-toolbar"><div><span class="eyebrow">ESSAY DRAFT</span><h3>作文草稿</h3></div><div class="timer-control"><span id="timer">20:00</span><button id="timerButton" class="primary small" type="button">开始</button><button id="resetTimer" class="secondary small" type="button">重置</button></div></div>
+            <textarea id="essay" class="essay-input" placeholder="在这里输入完整作文……" spellcheck="true"></textarea>
+            <div class="editor-footer"><span><strong id="wordCount">0</strong><span id="wordTarget"> / 150 words</span></span><span>草稿自动保存</span></div>
+          </article>
+        </section>
+
+        <aside class="assistant-column">
+          <article class="panel"><span class="eyebrow">PLAN</span><h3>写前计划</h3><textarea id="plan" class="plan-input" placeholder="记录结构、观点、比较或bullet要点"></textarea></article>
+          <article class="panel score-panel"><span class="eyebrow">AI SCORE</span><h3>提交完整评分</h3><p>使用当前统一 A/G 评分接口。稳定样本由双评分官完成，争议样本会进入条件复核。</p><button id="gradeButton" class="primary full" type="button">开始评分</button><div id="gradingState" class="grading-state hidden"></div></article>
+          <article class="panel legal-note"><strong>非官方声明</strong><p>本工具与 British Council、IDP、Cambridge 及 IELTS 官方不存在隶属或授权关系。AI估分仅供学习参考。</p></article>
+        </aside>
+      </div>
+    </section>
+
+    <section id="report" class="page hidden">
+      <div class="report-hero"><div><span class="eyebrow">SCORE REPORT</span><h2>本次写作评分</h2><p id="reportMeta"></p></div><div class="overall-score"><span>Overall</span><strong id="overallBand">0.0</strong><small>AI estimated band</small></div></div>
+      <div id="criteriaGrid" class="criteria-grid"></div>
+      <div class="report-layout"><section><article class="panel"><span class="eyebrow">ASSESSMENT</span><h3>总体判断</h3><p id="assessment"></p></article><div id="reportDetails"></div></section><aside><article class="panel warning-panel"><span class="eyebrow">REVIEW FLAGS</span><h3>复核提示</h3><ul id="warningList"></ul></article><button id="editAgain" class="primary full" type="button">返回修改作文</button><button id="newFromReport" class="secondary full" type="button">新建另一篇</button></aside></div>
+    </section>
+  </main>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
