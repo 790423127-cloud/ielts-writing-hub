@@ -1,12 +1,14 @@
 {
   "name": "ielts-writing-studio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Clean IELTS Academic and General Training writing workspace without a public prompt library.",
+  "description": "Clean IELTS Academic and General Training writing, scoring and learning workspace without a public prompt library.",
   "scripts": {
     "dev": "node dev-server.js",
     "start": "node dev-server.js",
     "test": "node --test tests/*.test.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
