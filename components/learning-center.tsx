@@ -11,34 +11,29 @@ interface LearningCenterProps {
   onGenerateTeacher: () => void;
 }
 
+function recordOf(value: unknown): Record<string, any> {
+  return value && typeof value === "object" ? value as Record<string, any> : {};
+}
+
 function textFrom(value: unknown): string {
   if (typeof value === "string") return value;
-  if (!value || typeof value !== "object") return "";
-  const object = value as Record<string, unknown>;
-  return String(
-    object.zh ??
-      object.summaryZh ??
-      object.whyThisBandZh ??
-      object.explanationZh ??
-      object.en ??
-      object.summary ??
-      ""
-  );
+  const item = recordOf(value);
+  return String(item.zh ?? item.summaryZh ?? item.explanationZh ?? item.en ?? item.summary ?? "");
 }
 
 function FeedbackView({ payload }: { payload: unknown }) {
-  const root = (payload && typeof payload === "object" ? payload : {}) as Record<string, unknown>;
-  const data = ((root.moduleResult ?? root.result ?? root) || {}) as Record<string, unknown>;
+  const root = recordOf(payload);
+  const data = recordOf(root.moduleResult ?? root.result ?? root);
   const summary = textFrom(data.summary) || String(data.summaryZh ?? "");
-
-  const collections = [
+  const collections: Array<[string, unknown]> = [
     ["重点问题", data.topProblems],
     ["逐句修改", data.sentenceCards],
     ["语法问题", data.grammarErrors],
     ["词形问题", data.wordFormErrors],
+    ["拼写速改", data.spellingQuickFix],
     ["任务检查", data.taskChecklist],
     ["四项反馈", data.criteria]
-  ] as const;
+  ];
 
   return (
     <div className="learning-output">
@@ -49,36 +44,21 @@ function FeedbackView({ payload }: { payload: unknown }) {
           : raw && typeof raw === "object"
             ? Object.entries(raw as Record<string, unknown>).map(([name, value]) => ({ name, value }))
             : [];
-        if (items.length === 0) return null;
-
+        if (!items.length) return null;
         return (
           <section key={title}>
             <h4>{title}</h4>
             <div className="learning-cards">
-              {items.slice(0, 20).map((item, index) => {
-                const record = (item && typeof item === "object" ? item : {}) as Record<string, unknown>;
-                const nested = record.value && typeof record.value === "object"
-                  ? record.value as Record<string, unknown>
-                  : record;
+              {items.slice(0, 30).map((item, index) => {
+                const record = recordOf(item);
+                const nested = recordOf(record.value ?? record);
                 const heading = String(
-                  record.name ??
-                    nested.problem ??
-                    nested.issueTitleZh ??
-                    nested.original ??
-                    nested.requirementZh ??
-                    nested.requirement ??
-                    `第 ${index + 1} 项`
+                  record.name ?? nested.problemZh ?? nested.problem ?? nested.issueTitleZh ??
+                  nested.original ?? nested.requirementZh ?? nested.requirement ?? nested.wrong ?? `第 ${index + 1} 项`
                 );
-                const detail =
-                  textFrom(nested.whyMatters) ||
-                  textFrom(nested.explanation) ||
-                  String(nested.whyThisBandZh ?? nested.whyNotHigherZh ?? nested.corrected ?? nested.minimalCorrection ?? "");
-                const example = String(
-                  nested.revisedExample ??
-                    nested.upgradedVersion ??
-                    nested.advice?.toString?.() ??
-                    ""
-                );
+                const detail = textFrom(nested.whyMatters) || textFrom(nested.explanation) ||
+                  String(nested.whyThisBandZh ?? nested.whyNotHigherZh ?? nested.corrected ?? nested.minimalCorrection ?? nested.note ?? "");
+                const example = String(nested.revisedExample ?? nested.upgradedVersion ?? nested.improved ?? nested.correct ?? "");
                 return (
                   <article key={`${heading}-${index}`} className="learning-card">
                     <strong>{heading}</strong>
@@ -96,25 +76,27 @@ function FeedbackView({ payload }: { payload: unknown }) {
 }
 
 function RevisionView({ payload }: { payload: unknown }) {
-  const root = (payload && typeof payload === "object" ? payload : {}) as Record<string, unknown>;
-  const parts = [
+  const root = recordOf(payload);
+  const parts: Array<[string, unknown]> = [
     ["题目范文", root.modelAnswer],
     ["+0.5 修改版", root.revisionPlus05],
     ["+1.0 修改版", root.revisionPlus10]
-  ] as const;
-
+  ];
   return (
     <div className="learning-cards">
       {parts.map(([title, raw]) => {
-        if (!raw || typeof raw !== "object") return null;
-        const part = raw as Record<string, unknown>;
+        const part = recordOf(raw);
         const essay = String(part.essay ?? part.text ?? "");
         if (!essay) return null;
+        const verification = recordOf(part.verification);
         return (
           <article className="revision-card" key={title}>
             <div>
               <h4>{title}</h4>
-              {Number.isFinite(Number(part.targetBand)) && <span>目标 Band {Number(part.targetBand).toFixed(1)}</span>}
+              <span>
+                {Number.isFinite(Number(part.targetBand)) ? `目标 Band ${Number(part.targetBand).toFixed(1)}` : ""}
+                {Number.isFinite(Number(verification.verifiedBand)) ? ` · 验证 ${Number(verification.verifiedBand).toFixed(1)}` : ""}
+              </span>
             </div>
             <p className="essay-text">{essay}</p>
           </article>
@@ -125,13 +107,11 @@ function RevisionView({ payload }: { payload: unknown }) {
 }
 
 function TeacherView({ payload }: { payload: unknown }) {
-  const root = (payload && typeof payload === "object" ? payload : {}) as Record<string, unknown>;
-  const data = ((root.moduleResult ?? root) || {}) as Record<string, unknown>;
-  const opening = (data.teacherOpening && typeof data.teacherOpening === "object"
-    ? data.teacherOpening
-    : {}) as Record<string, unknown>;
+  const root = recordOf(payload);
+  const data = recordOf(root.moduleResult ?? root);
+  const opening = recordOf(data.teacherOpening);
   const issues = Array.isArray(data.teachingIssues) ? data.teachingIssues : [];
-
+  const reusable = Array.isArray(data.reusableExpressions) ? data.reusableExpressions : [];
   return (
     <div className="teacher-view">
       <article className="teacher-opening">
@@ -139,14 +119,14 @@ function TeacherView({ payload }: { payload: unknown }) {
         <p>{String(opening.diagnosisZh ?? textFrom(data.summary))}</p>
       </article>
       {issues.map((raw, index) => {
-        const issue = raw as Record<string, unknown>;
+        const issue = recordOf(raw);
         const examples = Array.isArray(issue.examplesFromYourEssay) ? issue.examplesFromYourEssay : [];
         return (
           <details key={index} open>
-            <summary>{index + 1}. {String(issue.issueTitleZh ?? issue.issueTitleEn ?? "语言问题")}</summary>
+            <summary>{index + 1}. {String(issue.issueTitleZh ?? issue.issueTitleEn ?? "写作问题")}</summary>
             <p>{String(issue.slowLearnerExplanationZh ?? issue.whyTeacherPickedThisZh ?? "")}</p>
-            {examples.map((exampleRaw, exampleIndex) => {
-              const example = exampleRaw as Record<string, unknown>;
+            {examples.map((exampleRaw: unknown, exampleIndex: number) => {
+              const example = recordOf(exampleRaw);
               return (
                 <article className="teacher-example" key={exampleIndex}>
                   <del>{String(example.original ?? "")}</del>
@@ -158,6 +138,17 @@ function TeacherView({ payload }: { payload: unknown }) {
           </details>
         );
       })}
+      {reusable.length > 0 && (
+        <section>
+          <h4>可复用表达</h4>
+          <div className="learning-cards">
+            {reusable.map((raw: unknown, index: number) => {
+              const item = recordOf(raw);
+              return <article className="learning-card" key={index}><strong>{String(item.expression ?? "")}</strong><p>{String(item.meaningZh ?? item.useWhenZh ?? "")}</p></article>;
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -170,7 +161,6 @@ export function LearningCenter({
   onGenerateTeacher
 }: LearningCenterProps) {
   const [tab, setTab] = useState<"feedback" | "revision" | "teacher">("feedback");
-  const academicTask1 = session.profileId === "academic_task1";
   const modules = session.learning.modules;
   const latestModule = Object.keys(modules).at(-1) as LearningModuleName | undefined;
 
@@ -189,55 +179,28 @@ export function LearningCenter({
             <button type="button" onClick={() => onGenerateFeedback("overview")} disabled={!!busyAction}>全文总览</button>
             <button type="button" onClick={() => onGenerateFeedback("sentenceUpgrade")} disabled={!!busyAction}>逐句修改</button>
             <button type="button" onClick={() => onGenerateFeedback("grammarWordFormSpelling")} disabled={!!busyAction}>语法词形</button>
-            <button
-              type="button"
-              onClick={() => onGenerateFeedback("structureCohesionTask")}
-              disabled={!!busyAction || academicTask1}
-              title={academicTask1 ? "旧上游该模块仍含 G 类书信规则，暂不调用" : ""}
-            >
-              结构与任务回应
-            </button>
+            <button type="button" onClick={() => onGenerateFeedback("structureCohesionTask")} disabled={!!busyAction}>结构与任务回应</button>
           </div>
           {busyAction && <p className="loading-note">{busyAction}</p>}
-          {latestModule ? (
-            <FeedbackView payload={modules[latestModule]} />
-          ) : (
-            <p className="muted">选择一个模块生成反馈。</p>
-          )}
+          {latestModule ? <FeedbackView payload={modules[latestModule]} /> : <p className="muted">选择一个模块生成反馈。</p>}
         </div>
       )}
 
       {tab === "revision" && (
         <div>
-          {academicTask1 ? (
-            <div className="notice">
-              <strong>Academic Task 1 安全限制</strong>
-              <p>旧上游生成器仍可能套用 G 类书信规则，因此重构版暂不调用。</p>
-            </div>
-          ) : (
-            <>
-              <button type="button" className="primary" onClick={onGenerateRevision} disabled={!!busyAction}>生成范文与改写</button>
-              {busyAction && <p className="loading-note">{busyAction}</p>}
-              {session.learning.generation ? <RevisionView payload={session.learning.generation} /> : <p className="muted">评分后生成学习版本。</p>}
-            </>
-          )}
+          <button type="button" className="primary" onClick={onGenerateRevision} disabled={!!busyAction}>生成范文与改写</button>
+          {session.profileId === "academic_task1" && <p className="muted">A 类小作文会严格依据你确认的事实层生成，不会套用书信规则。</p>}
+          {busyAction && <p className="loading-note">{busyAction}</p>}
+          {session.learning.generation ? <RevisionView payload={session.learning.generation} /> : <p className="muted">评分后生成三个学习版本。</p>}
         </div>
       )}
 
       {tab === "teacher" && (
         <div>
-          {academicTask1 ? (
-            <div className="notice">
-              <strong>Academic Task 1 安全限制</strong>
-              <p>专用图表教师规则接入前，不会调用旧的书信教师模块。</p>
-            </div>
-          ) : (
-            <>
-              <button type="button" className="primary" onClick={onGenerateTeacher} disabled={!!busyAction}>生成 AI 教师精讲</button>
-              {busyAction && <p className="loading-note">{busyAction}</p>}
-              {session.learning.teacherClinic ? <TeacherView payload={session.learning.teacherClinic} /> : <p className="muted">教师记忆按 A/G 和 Task 分开保存。</p>}
-            </>
-          )}
+          <button type="button" className="primary" onClick={onGenerateTeacher} disabled={!!busyAction}>生成 AI 教师精讲</button>
+          {session.profileId === "academic_task1" && <p className="muted">A 类教师会重点讲 overview、关键特征、比较与数据准确性。</p>}
+          {busyAction && <p className="loading-note">{busyAction}</p>}
+          {session.learning.teacherClinic ? <TeacherView payload={session.learning.teacherClinic} /> : <p className="muted">教师记忆按 A/G 和 Task 分开保存。</p>}
         </div>
       )}
     </section>
