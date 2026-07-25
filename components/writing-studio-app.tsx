@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dashboard } from "./dashboard";
+import { ExpressionLibrary } from "./expression-library";
+import { MockExam } from "./mock-exam";
 import { ScoreReport } from "./score-report";
 import { Sidebar } from "./sidebar";
 import { Workspace } from "./workspace";
@@ -39,7 +41,7 @@ import type {
   WritingSession
 } from "@/types/writing.ts";
 
-type View = "dashboard" | "workspace" | "report";
+type View = "dashboard" | "workspace" | "report" | "mock" | "expressions";
 
 function lastSentence(text: string): { text: string; offsetStart: number } | null {
   const trimmedEnd = text.trimEnd();
@@ -325,7 +327,7 @@ export function WritingStudioApp() {
   };
 
   const clearData = () => {
-    if (!window.confirm("确定删除本浏览器中的全部练习、草稿和教师记忆吗？")) return;
+    if (!window.confirm("确定删除本浏览器中的全部练习、草稿、模拟考试、表达收藏和教师记忆吗？")) return;
     clearAllData();
     clearTeacherMemory();
     setSession(null);
@@ -354,6 +356,8 @@ export function WritingStudioApp() {
         theme={theme}
         onNew={() => setView("dashboard")}
         onContinue={() => session && setView("workspace")}
+        onOpenMockExam={() => setView("mock")}
+        onOpenExpressions={() => setView("expressions")}
         onOpenHistory={(saved) => {
           setSession(ensureSessionShape(saved));
           setView(saved.grading.result ? "report" : "workspace");
@@ -373,7 +377,13 @@ export function WritingStudioApp() {
         </header>
 
         {view === "dashboard" && (
-          <Dashboard stats={stats} onSelect={startSession} onOpenLatest={openLatest} />
+          <Dashboard
+            stats={stats}
+            onSelect={startSession}
+            onOpenLatest={openLatest}
+            onOpenMockExam={() => setView("mock")}
+            onOpenExpressions={() => setView("expressions")}
+          />
         )}
 
         {view === "workspace" && session && (
@@ -416,6 +426,14 @@ export function WritingStudioApp() {
             onGenerateRevision={generateRevision}
             onGenerateTeacher={generateTeacher}
           />
+        )}
+
+        {view === "mock" && (
+          <MockExam onClose={() => setView("dashboard")} onHistoryUpdated={setHistory} />
+        )}
+
+        {view === "expressions" && (
+          <ExpressionLibrary onClose={() => setView("dashboard")} />
         )}
       </main>
     </div>

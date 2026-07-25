@@ -8,6 +8,8 @@ interface SidebarProps {
   theme: "light" | "dark";
   onNew: () => void;
   onContinue: () => void;
+  onOpenMockExam: () => void;
+  onOpenExpressions: () => void;
   onOpenHistory: (session: WritingSession) => void;
   onRemoveHistory: (id: string) => void;
   onToggleTheme: () => void;
@@ -19,6 +21,8 @@ export function Sidebar({
   theme,
   onNew,
   onContinue,
+  onOpenMockExam,
+  onOpenExpressions,
   onOpenHistory,
   onRemoveHistory,
   onToggleTheme,
@@ -37,6 +41,8 @@ export function Sidebar({
       <nav className="sidebar-nav">
         <button type="button" onClick={onNew}>新建练习</button>
         <button type="button" onClick={onContinue}>继续写作</button>
+        <button type="button" onClick={onOpenMockExam}>模拟考试</button>
+        <button type="button" onClick={onOpenExpressions}>表达收藏</button>
       </nav>
 
       <section className="sidebar-section">

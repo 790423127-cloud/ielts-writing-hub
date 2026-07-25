@@ -150,3 +150,30 @@ export interface HistoryStats {
   best: number | null;
   weakestCriterion: string;
 }
+
+export interface SavedExpression {
+  id: string;
+  expression: string;
+  meaningZh: string;
+  usageNote: string;
+  sourceTitle: string;
+  profileId: TaskProfileId | "";
+  tags: string[];
+  createdAt: string;
+}
+
+export interface MockExamDraft {
+  schemaVersion: 1;
+  id: string;
+  examModule: "academic" | "general_training";
+  task1: WritingSession;
+  task2: WritingSession;
+  activeTask: 1 | 2;
+  timer: {
+    durationSeconds: number;
+    remainingSeconds: number;
+    running: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+}

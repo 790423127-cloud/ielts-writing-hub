@@ -15,9 +15,17 @@ interface DashboardProps {
   stats: HistoryStats;
   onSelect: (profileId: TaskProfileId) => void;
   onOpenLatest: () => void;
+  onOpenMockExam: () => void;
+  onOpenExpressions: () => void;
 }
 
-export function Dashboard({ stats, onSelect, onOpenLatest }: DashboardProps) {
+export function Dashboard({
+  stats,
+  onSelect,
+  onOpenLatest,
+  onOpenMockExam,
+  onOpenExpressions
+}: DashboardProps) {
   return (
     <section className="page">
       <div className="hero">
@@ -53,6 +61,23 @@ export function Dashboard({ stats, onSelect, onOpenLatest }: DashboardProps) {
             <em>{profile.minutes} 分钟 · 至少 {profile.minimumWords} 词</em>
           </button>
         ))}
+      </div>
+
+      <div className="tool-grid">
+        <button className="tool-card" type="button" onClick={onOpenMockExam}>
+          <span>60</span>
+          <div>
+            <strong>模拟考试</strong>
+            <small>自行粘贴 Task 1 和 Task 2，完成 60 分钟全套练习。</small>
+          </div>
+        </button>
+        <button className="tool-card" type="button" onClick={onOpenExpressions}>
+          <span>☆</span>
+          <div>
+            <strong>表达收藏</strong>
+            <small>保存自己的短语、句型、中文解释和使用场景。</small>
+          </div>
+        </button>
       </div>
 
       <div className="dashboard-actions">

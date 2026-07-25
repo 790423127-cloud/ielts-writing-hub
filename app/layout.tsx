@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./migration.css";
 
 export const metadata: Metadata = {
   title: "IELTS Writing Studio",
