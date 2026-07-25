@@ -1,8 +1,0 @@
-# Upstream unified scoring service. The first version uses the existing v6.5 scoring deployment.
-SCORING_UPSTREAM_URL=https://ielts-gt-writing-hub.vercel.app/api/grade-writing
-
-# Optional token if the upstream is protected.
-UPSTREAM_BEARER_TOKEN=
-
-# Local port
-PORT=4000

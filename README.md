@@ -1,65 +1,74 @@
-# IELTS Writing Studio v0.2
+# IELTS Writing Hub
 
-一个不提供公共题库的 IELTS Academic / General Training 写作、评分和复盘工作台。用户先选择四类任务之一，再粘贴自己有权使用的题目。
+一个基于 **Next.js App Router + TypeScript** 的 IELTS Academic / General Training 写作工作台。网站不提供公共题库，用户自行粘贴有权使用的题目。
 
-## v0.2 功能
+## 当前功能
 
-- Academic Task 1 / Task 2、General Training Task 1 / Task 2 四选一。
-- 用户自行粘贴题目，不内置公共题库。
-- 题目特征识别与任务冲突提醒；Task 2 的 A/G 仍以用户选择为准。
-- Academic Task 1 图片本地预览、图表类型和事实摘要确认。
-- 20/40分钟计时、实时字数、写前计划和草稿自动保存。
-- 最近30次练习、平均分、最高分和最弱评分项统计。
-- 统一评分请求、Overall、四项分、证据和复核提示。
-- 最后一句高置信度快速检查，并可一键应用修正。
-- 四个学习反馈模块：全文总览、逐句升级、语法词形拼写、结构与任务回应。
-- 题目范文、基于原文的 +0.5 和 +1.0 修改版。
-- AI教师精讲和 A1/G1/A2/G2 分开的错误记忆。
-- Markdown 报告导出、深色模式和手机适配。
-
-## Academic Task 1 安全限制
-
-当前上游 `writing-feedback` 和 `essay-generator` 的部分旧 Task 1 高级提示仍以 G 类书信为主。因此 v0.2：
-
-- Academic Task 1 的核心评分和四项评分报告正常使用；
-- 全文总览、逐句升级、语法词形拼写可以使用；
-- 暂时禁用 Academic Task 1 的“结构与任务回应”“三步改写”“教师精讲”，避免把书信规则错误套进图表作文。
-
-后续会接入 Academic Task 1 专用 overview、关键特征、比较、数据准确性、地图和流程图规则。
+- Academic Task 1 / Task 2、General Training Task 1 / Task 2 四类任务。
+- 用户粘贴题目，系统检查题目特征与用户选择是否冲突。
+- Academic Task 1 本地题图预览与用户确认的事实层。
+- 作文编辑、写前计划、20/40 分钟计时、实时字数。
+- 浏览器本地草稿、最近 30 次练习、统计和深色模式。
+- 统一 A/G 评分、四项报告、原文证据和人工复核提示。
+- 高置信度句子检查。
+- 四项深度反馈、全文总览、逐句修改、语法词形。
+- 非 Academic Task 1 的范文、+0.5/+1.0 改写和 AI 教师精讲。
+- A/G 与 Task 分开的教师错误记忆。
+- Markdown 报告导出。
 
 ## 架构
 
-这是独立仓库，不修改 `ielts-gt-writing-hub`。当前通过本仓库的服务端代理调用现有统一评分和高级学习接口，浏览器不会直接跨域请求旧站，也不会暴露密钥。
-
-## 本地运行
-
-要求 Node.js 20+。
-
-```powershell
-Copy-Item environment.template .env.local
-npm start
+```text
+app/                 Next.js 页面与 Route Handlers
+components/          页面组件
+lib/                 会话、题型识别、本地存储、API 客户端
+types/               共享 TypeScript 类型
+tests/               不依赖浏览器的核心逻辑测试
 ```
 
-打开 `http://127.0.0.1:4000`。
+旧版原生 HTML、单体 `app.js`、自建开发服务器和旧 Vercel Functions 已删除。评分及高级 AI 功能通过同源 Route Handlers 转发到现有评分服务，因此浏览器不会暴露密钥，也不需要跨域访问。
 
-```bash
-npm test
-```
+## 环境变量
 
-## Vercel
-
-环境变量：
+Vercel 至少配置：
 
 ```text
 SCORING_UPSTREAM_URL=https://ielts-gt-writing-hub.vercel.app/api/grade-writing
 ```
 
-Vercel 连接 GitHub 后，推送到 `main` 会自动重新部署。
+其他接口会从该地址自动推导同一个 `/api` 基础地址。也可以显式配置：
+
+```text
+UPSTREAM_BASE_URL=https://ielts-gt-writing-hub.vercel.app/api
+UPSTREAM_BEARER_TOKEN=
+```
+
+## 本地运行
+
+```bash
+npm install
+npm run dev
+```
+
+打开 `http://localhost:3000`。
+
+## 检查
+
+```bash
+npm test
+npm run typecheck
+npm run build
+```
+
+## Academic Task 1 限制
+
+图片只在用户浏览器中预览，不会自动上传给评分模型。评分器依据用户填写的事实摘要和关键特征核对内容。
+
+旧上游的“范文生成”和“教师精讲”仍可能使用 G 类 Task 1 书信规则，因此 Academic Task 1 暂时禁用这两个入口，避免错误规则串线。四项评分和 criterion feedback 仍使用 Academic Task 1 专用逻辑。
 
 ## 隐私与版权
 
 - 不内置、不展示、不建立公共题库。
-- 题目、草稿、教师记忆默认保存在当前浏览器。
-- 历史记录不保存 Academic Task 1 原图数据，避免 localStorage 超限。
+- 题目、草稿和练习历史默认保存在用户浏览器。
 - 用户应仅提交其有权使用的材料。
-- 本项目不是 IELTS 官方产品，AI 分数不等于正式成绩。
+- 本项目不是 IELTS 官方产品，AI 估分不等于正式成绩。

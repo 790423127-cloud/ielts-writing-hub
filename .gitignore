@@ -1,6 +1,10 @@
-node_modules/
+node_modules
+.next
+out
+coverage
+*.log
 .env
 .env.local
-.vercel/
+.env.*.local
+next-env.d.ts
 .DS_Store
-output/

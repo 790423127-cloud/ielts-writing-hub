@@ -1,14 +1,29 @@
 {
-  "name": "ielts-writing-studio",
-  "version": "0.2.0",
+  "name": "ielts-writing-hub",
+  "version": "0.3.0",
   "private": true,
-  "description": "Clean IELTS Academic and General Training writing, scoring and learning workspace without a public prompt library.",
+  "type": "module",
   "scripts": {
-    "dev": "node dev-server.js",
-    "start": "node dev-server.js",
-    "test": "node --test tests/*.test.mjs"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "next": "16.2.11",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.2.11",
+    "typescript": "5.8.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.9.0"
   }
 }

@@ -1,9 +1,0 @@
-{
-  "version": 2,
-  "functions": {
-    "api/*.js": { "maxDuration": 180 }
-  },
-  "rewrites": [
-    { "source": "/api/grade-writing", "destination": "/api/grade-writing" }
-  ]
-}
