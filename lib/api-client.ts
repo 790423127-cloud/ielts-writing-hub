@@ -39,5 +39,7 @@ export const apiClient = {
   generateEssay: <T>(payload: Record<string, unknown>, signal?: AbortSignal) =>
     postJson<T>("/api/essay-generator", payload, signal),
   liveCheck: <T>(payload: Record<string, unknown>, signal?: AbortSignal) =>
-    postJson<T>("/api/live-check", payload, signal)
+    postJson<T>("/api/live-check", payload, signal),
+  analyseVisual: <T>(payload: Record<string, unknown>, signal?: AbortSignal) =>
+    postJson<T>("/api/analyse-visual", payload, signal)
 };
