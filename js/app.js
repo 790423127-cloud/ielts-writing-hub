@@ -1,8 +1,3 @@
-const learningStyles = document.createElement("link");
-learningStyles.rel = "stylesheet";
-learningStyles.href = "learning.css";
-document.head.appendChild(learningStyles);
-
 import { $, els, runtime, setSession, setView, renderProfiles, startSession, restoreSession, syncInputs, renderWorkspace, renderHistory, renderDashboardStats, applyTheme, loadTheme, loadHistory, toggleTimer, resetTimer, stopTimer, onImageSelected } from "./runtime.js";
 import { clearAllData } from "./storage.js";
 import { submitGrading } from "./grading-ui.js";
