@@ -14,6 +14,8 @@
 - 四项深度反馈、全文总览、逐句修改、语法词形。
 - 非 Academic Task 1 的范文、+0.5/+1.0 改写和 AI 教师精讲。
 - A/G 与 Task 分开的教师错误记忆。
+- 60 分钟 A/G 模拟考试：用户自行粘贴 Task 1 和 Task 2，分别评分并生成加权练习估分。
+- 表达收藏：支持中文说明、标签、搜索、复制和 Markdown 导出。
 - Markdown 报告导出。
 
 ## 架构
@@ -60,6 +62,14 @@ npm run typecheck
 npm run build
 ```
 
+## Vercel 设置
+
+- Framework Preset：`Next.js`
+- Build Command：默认
+- Output Directory：不要填写 `public`，并关闭 Override
+- Install Command：默认
+- Root Directory：`./`
+
 ## Academic Task 1 限制
 
 图片只在用户浏览器中预览，不会自动上传给评分模型。评分器依据用户填写的事实摘要和关键特征核对内容。
@@ -69,8 +79,6 @@ npm run build
 ## 隐私与版权
 
 - 不内置、不展示、不建立公共题库。
-- 题目、草稿和练习历史默认保存在用户浏览器。
+- 题目、草稿、模拟考试、表达收藏和练习历史默认保存在用户浏览器。
 - 用户应仅提交其有权使用的材料。
 - 本项目不是 IELTS 官方产品，AI 估分不等于正式成绩。
-
-<!-- Vercel redeploy trigger: 2026-07-26 -->
