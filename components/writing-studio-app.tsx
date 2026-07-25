@@ -268,7 +268,7 @@ export function WritingStudioApp() {
   };
 
   const generateRevision = async () => {
-    if (!session?.grading.result || session.profileId === "academic_task1") return;
+    if (!session?.grading.result) return;
     try {
       setBusyAction("正在生成范文与改写…");
       const result = await apiClient.generateEssay<unknown>(
@@ -288,7 +288,7 @@ export function WritingStudioApp() {
   };
 
   const generateTeacher = async () => {
-    if (!session?.grading.result || session.profileId === "academic_task1") return;
+    if (!session?.grading.result) return;
     try {
       setBusyAction("正在生成 AI 教师精讲…");
       const result = await apiClient.learningFeedback<Record<string, unknown>>(
@@ -316,6 +316,35 @@ export function WritingStudioApp() {
       window.alert(error instanceof Error ? error.message : String(error));
     } finally {
       setBusyAction("");
+    }
+  };
+
+  const analyseVisual = async () => {
+    if (!session || session.profileId !== "academic_task1" || !session.prompt.imageDataUrl) return;
+    try {
+      setMessage("正在读取题图，请稍候…");
+      const result = await apiClient.analyseVisual<{ visualFacts?: Record<string, unknown> }>({
+        imageDataUrl: session.prompt.imageDataUrl,
+        questionPrompt: session.prompt.text
+      });
+      const facts = result.visualFacts && typeof result.visualFacts === "object" ? result.visualFacts : {};
+      updateSession((current) => ({
+        ...current,
+        prompt: {
+          ...current.prompt,
+          visualFacts: {
+            ...current.prompt.visualFacts,
+            visualType: String(facts.visualType || current.prompt.visualFacts.visualType || "unknown"),
+            referenceDescription: String(facts.referenceDescription || current.prompt.visualFacts.referenceDescription || ""),
+            keyFeatures: Array.isArray(facts.keyFeatures) ? facts.keyFeatures.map(String).filter(Boolean).slice(0, 30) : current.prompt.visualFacts.keyFeatures,
+            sourceVerified: false,
+            verificationNote: String(facts.verificationNote || "Extracted by vision model; awaiting user confirmation.")
+          }
+        }
+      }));
+      setMessage("题图信息已提取，请对照原图核对后勾选确认。 ");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -411,6 +440,7 @@ export function WritingStudioApp() {
             }}
             onGrade={grade}
             onQuickCheck={quickCheck}
+            onAnalyseVisual={analyseVisual}
             onApplySuggestion={applySuggestion}
             onSwitchProfile={switchProfile}
           />
